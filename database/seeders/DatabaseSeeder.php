@@ -2,24 +2,24 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Datos iniciales del taller. Todos los seeders son idempotentes:
+     * se pueden volver a correr sin duplicar ni sobrescribir lo que el administrador cambió.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RolesYPermisosSeeder::class,
+            SucursalYAdministradorSeeder::class,
+            PreferenciasOperacionSeeder::class,
+            MarcasYModelosSeeder::class,
+            ChecklistRecepcionSeeder::class,
+            AngulosFotoSeeder::class,
+            ZonasVehiculoSeeder::class,
         ]);
     }
 }
