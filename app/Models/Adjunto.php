@@ -7,10 +7,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 
 /**
  * Foto, firma o documento de una inspección, un daño o una orden.
  * Créalo con Adjunto::desdeArchivo() para calcular el hash de evidencia.
+ *
+ * @property int $id
+ * @property string $adjuntable_type
+ * @property int $adjuntable_id
+ * @property TipoAdjunto $tipo
+ * @property int|null $angulo_foto_id
+ * @property string $disk
+ * @property string $ruta
+ * @property string $mime
+ * @property int $tamano_bytes
+ * @property string $hash_sha256
+ * @property Carbon|null $tomada_at
+ * @property string|null $descripcion
+ * @property int|null $subido_por_id
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Adjunto extends Model
 {
@@ -40,16 +57,19 @@ class Adjunto extends Model
         ];
     }
 
+    /** @return MorphTo<Model, $this> */
     public function adjuntable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /** @return BelongsTo<AnguloFoto, $this> */
     public function anguloFoto(): BelongsTo
     {
         return $this->belongsTo(AnguloFoto::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function subidoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'subido_por_id');

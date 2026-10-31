@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 /** Zonas del diagrama de carrocería aprobadas por el taller. */
 class ZonasVehiculoSeeder extends Seeder
 {
+    /** @return array<int, array{0: string, 1: string, 2: string, 3: array<int, string>}> */
     public function zonas(): array
     {
         $autos = ChecklistRecepcionSeeder::AUTOS;

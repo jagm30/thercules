@@ -8,7 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string|null $numero_parte
+ * @property string $descripcion
+ * @property string|null $marca
+ * @property string|null $categoria
+ * @property UnidadRefaccion $unidad
+ * @property string|null $costo
+ * @property string|null $precio_venta
+ * @property bool $activo
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ */
 class Refaccion extends Model
 {
     use SoftDeletes;
@@ -39,6 +54,7 @@ class Refaccion extends Model
         ];
     }
 
+    /** @return BelongsToMany<Servicio, $this> */
     public function servicios(): BelongsToMany
     {
         return $this->belongsToMany(Servicio::class, 'servicio_refacciones')
@@ -46,16 +62,25 @@ class Refaccion extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<OrdenRefaccion, $this> */
     public function usos(): HasMany
     {
         return $this->hasMany(OrdenRefaccion::class);
     }
 
+    /**
+     * @param  Builder<Refaccion>  $query
+     * @return Builder<Refaccion>
+     */
     public function scopeActivas(Builder $query): Builder
     {
         return $query->where('activo', true)->orderBy('descripcion');
     }
 
+    /**
+     * @param  Builder<Refaccion>  $query
+     * @return Builder<Refaccion>
+     */
     public function scopeBuscar(Builder $query, string $texto): Builder
     {
         return $query->where(function ($q) use ($texto) {

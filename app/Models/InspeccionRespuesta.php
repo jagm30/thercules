@@ -4,7 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $inspeccion_id
+ * @property int|null $checklist_item_id
+ * @property string $item_nombre
+ * @property string $valor
+ * @property string|null $comentario
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class InspeccionRespuesta extends Model
 {
     protected $table = 'inspeccion_respuestas';
@@ -27,11 +38,13 @@ class InspeccionRespuesta extends Model
         });
     }
 
+    /** @return BelongsTo<Inspeccion, $this> */
     public function inspeccion(): BelongsTo
     {
         return $this->belongsTo(Inspeccion::class);
     }
 
+    /** @return BelongsTo<ChecklistItem, $this> */
     public function checklistItem(): BelongsTo
     {
         return $this->belongsTo(ChecklistItem::class)->withTrashed();

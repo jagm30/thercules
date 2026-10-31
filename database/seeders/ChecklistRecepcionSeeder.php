@@ -14,6 +14,7 @@ class ChecklistRecepcionSeeder extends Seeder
     /** Todo menos motocicleta. */
     public const AUTOS = ['sedan', 'hatchback', 'suv', 'pickup', 'van', 'coupe', 'camion'];
 
+    /** @return array<int, array{0: string, 1: string, 2: string, 3: bool, 4: string, 5: array<int, string>|null}> */
     public function items(): array
     {
         $A = self::AUTOS;

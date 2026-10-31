@@ -71,22 +71,27 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
     // ── Relaciones ───────────────────────────────────────────────
 
+    /** @return BelongsTo<Sucursal, $this> */
     public function sucursal(): BelongsTo
     {
         return $this->belongsTo(Sucursal::class);
     }
 
+    /** @return HasMany<OrdenServicio, $this> */
     public function ordenesRecibidas(): HasMany
     {
         return $this->hasMany(OrdenServicio::class, 'recibido_por_id');
     }
 
+    /** @return HasMany<OrdenServicio, $this> */
     public function ordenesAsignadas(): HasMany
     {
         return $this->hasMany(OrdenServicio::class, 'mecanico_responsable_id');
     }
 
-    /** Trabajos en los que participó como mecánico, con sus horas. */
+    /** Trabajos en los que participó como mecánico, con sus horas.
+     * @return BelongsToMany<OrdenServicioItem, $this>
+     */
     public function trabajos(): BelongsToMany
     {
         return $this->belongsToMany(OrdenServicioItem::class, 'orden_servicio_mecanico', 'user_id', 'orden_servicio_item_id')
@@ -96,6 +101,10 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
     // ── Scopes ───────────────────────────────────────────────────
 
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('activo', true);

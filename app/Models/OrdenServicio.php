@@ -17,8 +17,37 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int $id
+ * @property int $sucursal_id
+ * @property string $folio
+ * @property int $vehiculo_id
+ * @property int|null $cliente_id
+ * @property TipoOrden $tipo
+ * @property int|null $orden_garantia_de_id
+ * @property EstadoOrden $estado
+ * @property bool $con_precios
+ * @property int $recibido_por_id
+ * @property int|null $mecanico_responsable_id
+ * @property int|null $entregado_por_id
+ * @property Carbon $fecha_ingreso
+ * @property Carbon|null $fecha_promesa
+ * @property Carbon|null $fecha_entrega
+ * @property string $motivo_ingreso
+ * @property string|null $diagnostico
+ * @property string|null $observaciones
+ * @property string|null $motivo_cancelacion
+ * @property string|null $subtotal
+ * @property string|null $descuento
+ * @property string|null $iva
+ * @property string|null $total
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ */
 class OrdenServicio extends Model
 {
     use RegistraActividad, SoftDeletes;
@@ -65,83 +94,101 @@ class OrdenServicio extends Model
 
     // ── Relaciones ───────────────────────────────────────────────
 
+    /** @return BelongsTo<Sucursal, $this> */
     public function sucursal(): BelongsTo
     {
         return $this->belongsTo(Sucursal::class);
     }
 
+    /** @return BelongsTo<Vehiculo, $this> */
     public function vehiculo(): BelongsTo
     {
         return $this->belongsTo(Vehiculo::class);
     }
 
+    /** @return BelongsTo<Cliente, $this> */
     public function cliente(): BelongsTo
     {
         return $this->belongsTo(Cliente::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function recibidoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recibido_por_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function mecanicoResponsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mecanico_responsable_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function entregadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'entregado_por_id');
     }
 
-    /** Orden original cuando esta es una garantía. */
+    /** Orden original cuando esta es una garantía.
+     * @return BelongsTo<OrdenServicio, $this>
+     */
     public function ordenOriginal(): BelongsTo
     {
         return $this->belongsTo(self::class, 'orden_garantia_de_id');
     }
 
+    /** @return HasMany<OrdenServicio, $this> */
     public function garantias(): HasMany
     {
         return $this->hasMany(self::class, 'orden_garantia_de_id');
     }
 
+    /** @return HasMany<OrdenEstado, $this> */
     public function bitacoraEstados(): HasMany
     {
         return $this->hasMany(OrdenEstado::class)->orderBy('created_at')->orderBy('id');
     }
 
+    /** @return HasMany<Inspeccion, $this> */
     public function inspecciones(): HasMany
     {
         return $this->hasMany(Inspeccion::class);
     }
 
+    /** @return HasOne<Inspeccion, $this> */
     public function recepcion(): HasOne
     {
         return $this->hasOne(Inspeccion::class)->where('tipo', TipoInspeccion::Recepcion->value);
     }
 
+    /** @return HasOne<Inspeccion, $this> */
     public function entrega(): HasOne
     {
         return $this->hasOne(Inspeccion::class)->where('tipo', TipoInspeccion::Entrega->value);
     }
 
-    /** Trabajos realizados (tabla orden_servicios). */
+    /** Trabajos realizados (tabla orden_servicios).
+     * @return HasMany<OrdenServicioItem, $this>
+     */
     public function trabajos(): HasMany
     {
         return $this->hasMany(OrdenServicioItem::class);
     }
 
+    /** @return HasMany<OrdenRefaccion, $this> */
     public function refacciones(): HasMany
     {
         return $this->hasMany(OrdenRefaccion::class);
     }
 
+    /** @return MorphMany<Adjunto, $this> */
     public function adjuntos(): MorphMany
     {
         return $this->morphMany(Adjunto::class, 'adjuntable');
     }
 
+    /** @return HasMany<RecordatorioServicio, $this> */
     public function recordatoriosGenerados(): HasMany
     {
         return $this->hasMany(RecordatorioServicio::class, 'orden_origen_id');
@@ -149,11 +196,19 @@ class OrdenServicio extends Model
 
     // ── Scopes ───────────────────────────────────────────────────
 
+    /**
+     * @param  Builder<OrdenServicio>  $query
+     * @return Builder<OrdenServicio>
+     */
     public function scopeAbiertas(Builder $query): Builder
     {
         return $query->whereIn('estado', EstadoOrden::abiertos());
     }
 
+    /**
+     * @param  Builder<OrdenServicio>  $query
+     * @return Builder<OrdenServicio>
+     */
     public function scopeAsignadasA(Builder $query, User $mecanico): Builder
     {
         return $query->where(function ($q) use ($mecanico) {

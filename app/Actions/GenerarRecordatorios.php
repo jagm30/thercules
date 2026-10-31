@@ -19,7 +19,9 @@ class GenerarRecordatorios
             return;
         }
 
-        $kmSalida = $orden->entrega?->km ?? $orden->recepcion?->km ?? $orden->vehiculo->km_actual;
+        $entregaKm = $orden->entrega()->first()?->km;
+        $recepcionKm = $orden->recepcion()->first()?->km;
+        $kmSalida = $entregaKm ?? $recepcionKm ?? $orden->vehiculo?->km_actual;
 
         DB::transaction(function () use ($orden, $kmSalida) {
             $trabajos = $orden->trabajos()->with('servicio')->whereNotNull('servicio_id')->get();
@@ -27,7 +29,11 @@ class GenerarRecordatorios
             foreach ($trabajos as $trabajo) {
                 $servicio = $trabajo->servicio;
 
-                $orden->vehiculo->recordatorios()
+                if ($servicio === null) {
+                    continue;
+                }
+
+                $orden->vehiculo?->recordatorios()
                     ->pendientes()
                     ->where('servicio_id', $servicio->id)
                     ->update([
@@ -39,7 +45,7 @@ class GenerarRecordatorios
                     continue;
                 }
 
-                $orden->vehiculo->recordatorios()->create([
+                $orden->vehiculo?->recordatorios()->create([
                     'orden_origen_id' => $orden->id,
                     'servicio_id' => $servicio->id,
                     'descripcion' => $servicio->nombre,

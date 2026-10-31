@@ -4,7 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $orden_servicio_id
+ * @property int|null $orden_servicio_item_id
+ * @property int|null $refaccion_id
+ * @property string|null $numero_parte
+ * @property string|null $descripcion
+ * @property string $cantidad
+ * @property string|null $costo_unitario
+ * @property string|null $precio_unitario
+ * @property string|null $importe
+ * @property bool $proporcionada_por_cliente
+ * @property int|null $garantia_dias
+ * @property-read OrdenServicio $orden
+ * @property-read Refaccion|null $refaccion
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class OrdenRefaccion extends Model
 {
     protected $table = 'orden_refacciones';
@@ -55,27 +74,31 @@ class OrdenRefaccion extends Model
             }
 
             if ($r->proporcionada_por_cliente) {
-                $r->costo_unitario = 0;
-                $r->precio_unitario = 0;
+                $r->costo_unitario = '0.00';
+                $r->precio_unitario = '0.00';
             }
 
             $r->importe = $r->precio_unitario === null
                 ? null
-                : round((float) $r->cantidad * (float) $r->precio_unitario, 2);
+                : number_format(round((float) $r->cantidad * (float) $r->precio_unitario, 2), 2, '.', '');
         });
     }
 
+    /** @return BelongsTo<OrdenServicio, $this> */
     public function orden(): BelongsTo
     {
         return $this->belongsTo(OrdenServicio::class, 'orden_servicio_id');
     }
 
-    /** Trabajo al que pertenece la pieza. */
+    /** Trabajo al que pertenece la pieza.
+     * @return BelongsTo<OrdenServicioItem, $this>
+     */
     public function trabajo(): BelongsTo
     {
         return $this->belongsTo(OrdenServicioItem::class, 'orden_servicio_item_id');
     }
 
+    /** @return BelongsTo<Refaccion, $this> */
     public function refaccion(): BelongsTo
     {
         return $this->belongsTo(Refaccion::class)->withTrashed();

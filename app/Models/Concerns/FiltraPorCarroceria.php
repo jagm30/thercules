@@ -14,8 +14,9 @@ trait FiltraPorCarroceria
     public function aplicaA(TipoCarroceria|string $carroceria): bool
     {
         $valor = $carroceria instanceof TipoCarroceria ? $carroceria->value : $carroceria;
+        $tipos = $this->tipos_carroceria;
 
-        return empty($this->tipos_carroceria) || in_array($valor, $this->tipos_carroceria, true);
+        return empty($tipos) || in_array($valor, $tipos, true);
     }
 
     /**

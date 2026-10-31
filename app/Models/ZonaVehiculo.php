@@ -6,7 +6,18 @@ use App\Enums\VistaVehiculo;
 use App\Models\Concerns\FiltraPorCarroceria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $clave
+ * @property string $nombre
+ * @property VistaVehiculo $vista
+ * @property array<int, string>|null $tipos_carroceria
+ * @property int $orden
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class ZonaVehiculo extends Model
 {
     use FiltraPorCarroceria;
@@ -30,6 +41,7 @@ class ZonaVehiculo extends Model
         ];
     }
 
+    /** @return HasMany<InspeccionDanio, $this> */
     public function danios(): HasMany
     {
         return $this->hasMany(InspeccionDanio::class);

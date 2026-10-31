@@ -8,8 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int $id
+ * @property int $marca_id
+ * @property string $nombre
+ * @property TipoCarroceria $tipo_carroceria
+ * @property int|null $anio_inicio
+ * @property int|null $anio_fin
+ * @property bool $verificado
+ * @property bool $activo
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ */
 class ModeloVehiculo extends Model
 {
     use SoftDeletes;
@@ -37,21 +51,31 @@ class ModeloVehiculo extends Model
         ];
     }
 
+    /** @return BelongsTo<Marca, $this> */
     public function marca(): BelongsTo
     {
         return $this->belongsTo(Marca::class);
     }
 
+    /** @return HasMany<Vehiculo, $this> */
     public function vehiculos(): HasMany
     {
         return $this->hasMany(Vehiculo::class);
     }
 
+    /**
+     * @param  Builder<ModeloVehiculo>  $query
+     * @return Builder<ModeloVehiculo>
+     */
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('activo', true)->orderBy('nombre');
     }
 
+    /**
+     * @param  Builder<ModeloVehiculo>  $query
+     * @return Builder<ModeloVehiculo>
+     */
     public function scopePendientesDeVerificar(Builder $query): Builder
     {
         return $query->where('verificado', false);
@@ -75,7 +99,7 @@ class ModeloVehiculo extends Model
     public function fusionarEn(self $destino): void
     {
         DB::transaction(function () use ($destino) {
-            $this->vehiculos()->withTrashed()->update([
+            Vehiculo::withTrashed()->where('modelo_vehiculo_id', $this->id)->update([
                 'modelo_vehiculo_id' => $destino->id,
                 'marca_id' => $destino->marca_id,
             ]);

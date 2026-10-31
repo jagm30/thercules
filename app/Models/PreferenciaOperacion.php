@@ -7,10 +7,22 @@ use App\Models\Concerns\RegistraActividad;
 use App\Support\Preferencias;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Cómo opera el taller (modo con o sin precios, reglas de recepción, etc.).
  * Solo el administrador las modifica; cada cambio queda en activity_log.
+ *
+ * @property int $id
+ * @property int|null $sucursal_id
+ * @property string $grupo
+ * @property string $clave
+ * @property string|null $valor
+ * @property TipoPreferencia $tipo
+ * @property string|null $descripcion
+ * @property int|null $actualizado_por_id
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class PreferenciaOperacion extends Model
 {
@@ -41,11 +53,13 @@ class PreferenciaOperacion extends Model
         static::deleted(fn () => Preferencias::olvidar());
     }
 
+    /** @return BelongsTo<Sucursal, $this> */
     public function sucursal(): BelongsTo
     {
         return $this->belongsTo(Sucursal::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function actualizadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'actualizado_por_id');

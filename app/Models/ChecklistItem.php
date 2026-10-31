@@ -13,7 +13,22 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property GrupoChecklist $grupo
+ * @property string $nombre
+ * @property TipoRespuesta $tipo_respuesta
+ * @property bool $obligatorio
+ * @property AplicaEn $aplica_en
+ * @property array<int, string>|null $tipos_carroceria
+ * @property int $orden
+ * @property bool $activo
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ */
 class ChecklistItem extends Model
 {
     use FiltraPorCarroceria, SoftDeletes;
@@ -44,22 +59,36 @@ class ChecklistItem extends Model
         ];
     }
 
+    /** @return HasMany<InspeccionRespuesta, $this> */
     public function respuestas(): HasMany
     {
         return $this->hasMany(InspeccionRespuesta::class);
     }
 
+    /**
+     * @param  Builder<ChecklistItem>  $query
+     * @return Builder<ChecklistItem>
+     */
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('activo', true)->orderBy('grupo')->orderBy('orden');
     }
 
+    /**
+     * @param  Builder<ChecklistItem>  $query
+     * @return Builder<ChecklistItem>
+     */
     public function scopeParaInspeccion(Builder $query, TipoInspeccion $tipo): Builder
     {
-        return $query->activos()->whereIn('aplica_en', [$tipo->value, AplicaEn::Ambas->value]);
+        return $query->where('activo', true)->orderBy('grupo')->orderBy('orden')
+            ->whereIn('aplica_en', [$tipo->value, AplicaEn::Ambas->value]);
     }
 
-    /** Puntos que se deben mostrar en una inspección según su tipo y la carrocería. */
+    /**
+     * Puntos que se deben mostrar en una inspección según su tipo y la carrocería.
+     *
+     * @return Collection<int, static>
+     */
     public static function aplicables(TipoInspeccion $tipo, TipoCarroceria|string $carroceria): Collection
     {
         return new Collection(
@@ -67,7 +96,9 @@ class ChecklistItem extends Model
         );
     }
 
-    /** Valores válidos para una respuesta, según el tipo de respuesta. NULL = libre. */
+    /** Valores válidos para una respuesta, según el tipo de respuesta. NULL = libre.
+     * @return list<string>|null
+     */
     public function valoresPermitidos(): ?array
     {
         return match ($this->tipo_respuesta) {

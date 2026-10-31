@@ -8,8 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
-/** Catálogo de mano de obra. El precio incluye IVA y es NULL si el taller opera sin precios. */
+/**
+ * Catálogo de mano de obra. El precio incluye IVA y es NULL si el taller opera sin precios.
+ *
+ * @property int $id
+ * @property string $clave
+ * @property string $nombre
+ * @property string|null $descripcion
+ * @property string|null $categoria
+ * @property TipoCobro $tipo_cobro
+ * @property string|null $precio
+ * @property int|null $tiempo_estimado_min
+ * @property int|null $intervalo_meses
+ * @property int|null $intervalo_km
+ * @property bool $activo
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ */
 class Servicio extends Model
 {
     use SoftDeletes;
@@ -41,7 +59,9 @@ class Servicio extends Model
         ];
     }
 
-    /** Refacciones sugeridas al agregar este servicio a una orden. */
+    /** Refacciones sugeridas al agregar este servicio a una orden.
+     * @return BelongsToMany<Refaccion, $this>
+     */
     public function refaccionesSugeridas(): BelongsToMany
     {
         return $this->belongsToMany(Refaccion::class, 'servicio_refacciones')
@@ -49,11 +69,16 @@ class Servicio extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<OrdenServicioItem, $this> */
     public function trabajos(): HasMany
     {
         return $this->hasMany(OrdenServicioItem::class);
     }
 
+    /**
+     * @param  Builder<Servicio>  $query
+     * @return Builder<Servicio>
+     */
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('activo', true)->orderBy('nombre');
