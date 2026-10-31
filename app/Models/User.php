@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Concerns\HasTeams;
 use App\Support\Preferencias;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,16 +14,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\PasskeyUser;
+use Laravel\Fortify\PasskeyAuthenticatable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
  * Reemplaza el App\Models\User que trae Laravel.
  * Roles: administrador, recepcionista, mecanico (spatie/laravel-permission).
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, SoftDeletes;
+    use HasFactory, HasRoles, HasTeams, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable {
+        // Los equipos de Spatie están desactivados (permission.teams = false); manda el del kit.
+        HasTeams::teams insteadof HasRoles;
+    }
 
     protected $fillable = [
         'sucursal_id',
@@ -30,10 +39,13 @@ class User extends Authenticatable
         'telefono',
         'password',
         'activo',
+        'current_team_id',
     ];
 
     protected $hidden = [
         'password',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
         'remember_token',
     ];
 
@@ -42,8 +54,19 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_confirmed_at' => 'datetime',
             'activo' => 'boolean',
         ];
+    }
+
+    /** Iniciales del usuario para el avatar. */
+    public function initials(): string
+    {
+        $initials = Str::initials($this->name, true);
+
+        return Str::length($initials) > 1
+            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
+            : $initials;
     }
 
     // ── Relaciones ───────────────────────────────────────────────

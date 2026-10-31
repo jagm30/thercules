@@ -56,7 +56,8 @@ test('user can delete their account', function () {
         ->assertHasNoErrors()
         ->assertRedirect('/');
 
-    expect($user->fresh())->toBeNull();
+    // User usa SoftDeletes: la cuenta se conserva para el historial de órdenes.
+    $this->assertSoftDeleted($user);
     expect(auth()->check())->toBeFalse();
 });
 

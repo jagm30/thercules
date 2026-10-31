@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Teams\CreateTeam;
 use App\Models\Sucursal;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -36,7 +37,11 @@ class SucursalYAdministradorSeeder extends Seeder
             'sucursal_id' => null, // acceso a todas las sucursales
             'activo' => true,
         ]);
+        $admin->forceFill(['email_verified_at' => now()])->save();
         $admin->assignRole('administrador');
+
+        // El login redirige al equipo actual; sin uno responde 403.
+        app(CreateTeam::class)->handle($admin, $admin->name, isPersonal: true);
 
         if (! env('ADMIN_PASSWORD')) {
             $this->command?->warn("Administrador creado: {$email} / {$password}  (cámbiala al entrar)");
