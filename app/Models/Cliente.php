@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\TipoPersona;
+use App\Models\Concerns\RegistraActividad;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+
+/**
+ * @property int $id
+ * @property TipoPersona $tipo_persona
+ * @property string $nombre
+ * @property string|null $apellidos
+ * @property string|null $razon_social
+ * @property string|null $rfc
+ * @property string $telefono
+ * @property string|null $telefono_alt
+ * @property string|null $email
+ * @property string|null $direccion
+ * @property string|null $notas
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
+ */
+class Cliente extends Model
+{
+    use RegistraActividad, SoftDeletes;
+
+    protected $table = 'clientes';
+
+    protected $fillable = [
+        'tipo_persona',
+        'nombre',
+        'apellidos',
+        'razon_social',
+        'rfc',
+        'telefono',
+        'telefono_alt',
+        'email',
+        'direccion',
+        'notas',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'tipo_persona' => TipoPersona::class,
+        ];
+    }
+
+    /** Vehículos de los que es dueño actualmente. */
+    /** @return HasMany<Vehiculo, $this> */
+    public function vehiculos(): HasMany
+    {
+        return $this->hasMany(Vehiculo::class);
+    }
+
+    /** @return HasMany<OrdenServicio, $this> */
+    public function ordenes(): HasMany
+    {
+        return $this->hasMany(OrdenServicio::class);
+    }
+
+    /** Historial de propiedad (incluye vehículos que ya vendió). */
+    /** @return HasMany<VehiculoPropietario, $this> */
+    public function propiedades(): HasMany
+    {
+        return $this->hasMany(VehiculoPropietario::class);
+    }
+
+    /** @return Attribute<string, never> */
+    protected function nombreCompleto(): Attribute
+    {
+        return Attribute::get(fn () => $this->tipo_persona === TipoPersona::Moral
+            ? ($this->razon_social ?: $this->nombre)
+            : trim($this->nombre.' '.$this->apellidos));
+    }
+
+    /** @return Attribute<string|null, string|null> */
+    protected function rfc(): Attribute
+    {
+        return Attribute::set(fn (?string $v) => $v ? strtoupper(trim($v)) : null);
+    }
+}
