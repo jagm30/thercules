@@ -227,7 +227,7 @@ class OrdenServicio extends Model
             ]);
 
             if ($nuevo === EstadoOrden::Entregado) {
-                (new GenerarRecordatorios())->ejecutar($this);
+                (new GenerarRecordatorios)->ejecutar($this);
             }
         });
     }

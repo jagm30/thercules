@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  */
 class AbrirOrden
 {
-    public function __construct(private GenerarFolio $folios = new GenerarFolio()) {}
+    public function __construct(private GenerarFolio $folios = new GenerarFolio) {}
 
     public function ejecutar(
         Vehiculo $vehiculo,

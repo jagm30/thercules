@@ -11,8 +11,8 @@ namespace App\Models\Concerns;
  *                                Spatie\Activitylog\Traits\LogsActivity
  *                                Spatie\Activitylog\LogOptions
  */
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 trait RegistraActividad
 {

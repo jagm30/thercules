@@ -60,6 +60,7 @@ class CompletarInspeccion
                 if ($item->obligatorio) {
                     $f[] = "Checklist: falta «{$item->nombre}».";
                 }
+
                 continue;
             }
             $permitidos = $item->valoresPermitidos();

@@ -19,7 +19,7 @@ final class Preferencias
 
     public static function get(string $clave, ?int $sucursalId = null, mixed $default = null): mixed
     {
-        $llave = ($sucursalId ?? 'general') . '|' . $clave;
+        $llave = ($sucursalId ?? 'general').'|'.$clave;
 
         if (! array_key_exists($llave, self::$memo)) {
             $registro = PreferenciaOperacion::query()

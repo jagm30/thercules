@@ -66,7 +66,7 @@ class Adjunto extends Model
         ?AnguloFoto $angulo = null,
         string $disk = 'local',
     ): self {
-        $carpeta = 'evidencias/' . now()->format('Y/m') . '/' . class_basename($dueno) . '-' . $dueno->getKey();
+        $carpeta = 'evidencias/'.now()->format('Y/m').'/'.class_basename($dueno).'-'.$dueno->getKey();
         $ruta = $archivo->store($carpeta, $disk);
 
         return $dueno->morphMany(self::class, 'adjuntable')->create([

@@ -56,7 +56,7 @@ class Cliente extends Model
     {
         return Attribute::get(fn () => $this->tipo_persona === TipoPersona::Moral
             ? ($this->razon_social ?: $this->nombre)
-            : trim($this->nombre . ' ' . $this->apellidos));
+            : trim($this->nombre.' '.$this->apellidos));
     }
 
     protected function rfc(): Attribute

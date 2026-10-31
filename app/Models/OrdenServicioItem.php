@@ -54,7 +54,7 @@ class OrdenServicioItem extends Model
 
             $item->tipo_cobro ??= TipoCobro::Fijo;
             $item->cantidad ??= 1;
-            $item->estado ??= \App\Enums\EstadoTrabajo::Pendiente;
+            $item->estado ??= EstadoTrabajo::Pendiente;
 
             // Orden sin precios: ningún importe se guarda.
             if (! $item->orden->con_precios) {
